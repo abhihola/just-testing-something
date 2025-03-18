@@ -1,59 +1,68 @@
 import os
-import random
-from dotenv import load_dotenv
+import logging
 from flask import Flask, request
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackContext, MessageHandler, filters
+from telegram import Update, Bot
+from telegram.ext import Application, CommandHandler, CallbackContext
 
 # Load environment variables
-load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
-TOKEN = os.getenv("BOT_TOKEN")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # Your Render app URL
-REDIRECT_URL = os.getenv("REDIRECT_URL")  # Link for the button
-
+# Initialize Flask app
 app = Flask(__name__)
 
-# Initialize bot
-bot_app = Application.builder().token(TOKEN).build()
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
-# Load tips from file
-with open("tips.txt", "r", encoding="utf-8") as file:
-    TIPS = file.readlines()
+# Initialize the bot
+bot = Bot(token=BOT_TOKEN)
 
-# Start command
-async def start(update: Update, context: CallbackContext):
-    keyboard = [[InlineKeyboardButton("Visit Website", url=REDIRECT_URL)]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(
-        "Welcome! Click the button below for more info.\n"
-        "Use /tip to get a random scam prevention tip.",
-        reply_markup=reply_markup
-    )
+# Initialize the application
+app_telegram = Application.builder().token(BOT_TOKEN).build()
 
-# Send random tip
-async def tip(update: Update, context: CallbackContext):
-    await update.message.reply_text(random.choice(TIPS))
+# Root route to confirm bot is running
+@app.route("/", methods=["GET"])
+def home():
+    return "Telegram Bot is Running!", 200
 
-# Webhook endpoint
-@app.route(f"/{TOKEN}", methods=["POST"])
+# Webhook route to handle Telegram updates
+@app.route(f"/{BOT_TOKEN}", methods=["POST"])
 def webhook():
-    update = Update.de_json(request.get_json(), bot_app.bot)
-    bot_app.update_queue.put(update)
+    update = Update.de_json(request.get_json(), bot)
+    app_telegram.process_update(update)
     return "OK", 200
 
-# Set webhook on startup
-async def set_webhook():
-    await bot_app.bot.set_webhook(f"{WEBHOOK_URL}/{TOKEN}")
+# Command to handle /start
+async def start(update: Update, context: CallbackContext) -> None:
+    await update.message.reply_text("Hello! I am your support bot.")
 
-# Run bot
+# Command to provide security tips
+async def tips(update: Update, context: CallbackContext) -> None:
+    security_tips = [
+        "Use strong, unique passwords for each service.",
+        "Enable two-factor authentication (2FA) on all accounts.",
+        "Beware of phishing emails and links.",
+        "Keep your software and apps updated.",
+        "Never share personal details with unverified contacts."
+    ]
+    await update.message.reply_text(random.choice(security_tips))
+
+# Command to send a button linking to a URL
+async def support(update: Update, context: CallbackContext) -> None:
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+    support_url = os.getenv("SUPPORT_URL", "https://example.com")
+    keyboard = [[InlineKeyboardButton("Get Support", url=support_url)]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text("Click the button below for support:", reply_markup=reply_markup)
+
+# Add handlers to the bot application
+app_telegram.add_handler(CommandHandler("start", start))
+app_telegram.add_handler(CommandHandler("tips", tips))
+app_telegram.add_handler(CommandHandler("support", support))
+
+# Start the webhook when running the script
 if __name__ == "__main__":
-    import threading
-
-    # Start Flask server in a thread
-    threading.Thread(target=lambda: app.run(host="0.0.0.0", port=5000)).start()
-    
-    # Run Telegram bot
-    bot_app.add_handler(CommandHandler("start", start))
-    bot_app.add_handler(CommandHandler("tip", tip))
-    bot_app.run_webhook(port=5000)
+    bot.set_webhook(url=f"{WEBHOOK_URL}/{BOT_TOKEN}")
+    app.run(host="0.0.0.0", port=5000)
