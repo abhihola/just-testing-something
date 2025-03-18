@@ -7,13 +7,13 @@ bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     const firstName = msg.from.first_name || "User";
 
-    const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot helps you connect with **trusted hackers** for assistance.\n🔐 Plus, get **free safety tips** to stay secure online!\n\nChoose an option below:`;
+    const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot connects you with **trusted hackers** to assist you.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
 
     const options = {
         reply_markup: {
             inline_keyboard: [
-                [{ text: "🔍 Chat with a Hacker", url: "https://t.me/Hacktechnologyx" }],
-                [{ text: "🛡️ Get Free Safety Tips", callback_data: "safety_tips" }],
+                [{ text: "🔍 Get a Trusted Hacker", url: "https://t.me/Hacktechnologyx" }],
+                [{ text: "🛡️ Free Safety Tips", callback_data: "safety_tips" }],
                 [{ text: "⚠️ Report a Scam", url: "https://t.me/Hacktechnologyx" }]
             ]
         }
@@ -24,17 +24,19 @@ bot.onText(/\/start/, (msg) => {
 
 bot.on('callback_query', (query) => {
     const chatId = query.message.chat.id;
+
     if (query.data === "safety_tips") {
         const tips = [
             "🛡️ Use strong, unique passwords.",
-            "🛡️ Enable two-factor authentication (2FA).",
-            "🛡️ Avoid clicking unknown links.",
+            "🛡️ Enable 2FA on all accounts.",
+            "🛡️ Avoid clicking suspicious links.",
             "🛡️ Keep your software updated.",
             "🛡️ Never share personal details with strangers."
         ];
         const randomTip = tips[Math.floor(Math.random() * tips.length)];
         bot.sendMessage(chatId, randomTip);
     }
+
     bot.answerCallbackQuery(query.id);
 });
 
