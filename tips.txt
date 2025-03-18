@@ -1,5 +1,0 @@
-Never share your OTP or passwords with anyone.
-Always verify links before clicking.
-Check email addresses for authenticity.
-Avoid downloading files from unknown sources.
-Use two-factor authentication for extra security.
