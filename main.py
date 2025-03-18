@@ -9,6 +9,10 @@ import asyncio
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
+# Ensure variables are not empty
+if not BOT_TOKEN or not WEBHOOK_URL:
+    raise ValueError("BOT_TOKEN or WEBHOOK_URL is missing! Check your environment variables.")
+
 # Initialize Flask app
 app = Flask(__name__)
 
@@ -21,27 +25,24 @@ bot = Bot(token=BOT_TOKEN)
 # Initialize the application
 app_telegram = Application.builder().token(BOT_TOKEN).build()
 
-# Root route to confirm bot is running
 @app.route("/", methods=["GET"])
 def home():
     return "Telegram Bot is Running!", 200
 
-# Webhook route to handle Telegram updates
 @app.route(f"/{BOT_TOKEN}", methods=["POST"])
 def webhook():
     update = Update.de_json(request.get_json(), bot)
     app_telegram.process_update(update)
     return "OK", 200
 
-# Command to handle /start
 async def start(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text("Hello! I am your support bot.")
 
-# Add handlers to the bot application
 app_telegram.add_handler(CommandHandler("start", start))
 
 async def set_webhook():
     """Set webhook for Telegram bot"""
+    logging.info(f"Setting webhook to: {WEBHOOK_URL}/{BOT_TOKEN}")  # Debug print
     await bot.set_webhook(url=f"{WEBHOOK_URL}/{BOT_TOKEN}")
 
 if __name__ == "__main__":
