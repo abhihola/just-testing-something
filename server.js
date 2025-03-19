@@ -2,6 +2,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 const axios = require("axios");
 require("dotenv").config();
+const botFunctions = require("./bot"); // Import shared bot logic
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,9 +21,8 @@ const bots = [];
 botTokens.forEach((token, index) => {
     const bot = new TelegramBot(token.trim(), { polling: true });
 
-    bot.on("message", (msg) => {
-        bot.sendMessage(msg.chat.id, `Hello! I am Bot ${index + 1}`);
-    });
+    // Load shared bot functions
+    botFunctions(bot);
 
     console.log(`✅ Bot ${index + 1} is running with token: ${token.trim().slice(0, 5)}...`);
 
