@@ -1,27 +1,43 @@
-const express = require("express");
-const axios = require("axios");
-require("./bot"); // ✅ Ensure this is only imported ONCE
+const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Render Deploy Hook URL (Auto-refresh every 5 minutes)
-const DEPLOY_HOOK_URL = "https://api.render.com/deploy/srv-cvdemdl2ng1s73dtdms0?key=kDv-523xHBg";
+// Get all bot tokens from .env and split them into an array
+const botTokens = process.env.BOT_TOKENS ? process.env.BOT_TOKENS.split(',') : [];
 
-async function refreshBot() {
-    try {
-        const response = await axios.get(DEPLOY_HOOK_URL);
-        console.log("✅ Deploy Hook Triggered:", response.data);
-    } catch (error) {
-        console.error("❌ Error Refreshing:", error.message);
-    }
+if (botTokens.length === 0) {
+    console.error('❌ No bot tokens found in .env file!');
+    process.exit(1);
 }
 
-// Auto-refresh every 5 minutes
-setInterval(refreshBot, 5 * 60 * 1000);
+// Store all bot instances
+const bots = [];
 
-app.get("/", (req, res) => {
-    res.send("✅ Telegram bot is running...");
+botTokens.forEach((token, index) => {
+    const bot = new TelegramBot(token.trim(), { polling: true });
+
+    // Auto-restart polling if it crashes
+    bot.on('polling_error', (error) => {
+        console.error(`⚠️ Polling error for Bot ${index + 1}:`, error.message);
+        setTimeout(() => {
+            console.log(`🔄 Restarting polling for Bot ${index + 1}...`);
+            bot.startPolling();
+        }, 5000); // Restart after 5 seconds
+    });
+
+    bot.on('message', (msg) => {
+        bot.sendMessage(msg.chat.id, `Hello! I am Bot ${index + 1}`);
+    });
+
+    console.log(`✅ Bot ${index + 1} is running with token: ${token.trim().slice(0, 5)}...`);
+    bots.push(bot);
+});
+
+app.get('/', (req, res) => {
+    res.send(`✅ ${bots.length} Telegram bots are running...`);
 });
 
 app.listen(PORT, () => {
