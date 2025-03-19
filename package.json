@@ -1,18 +1,16 @@
 {
-  "name": "your-bot-name",
+  "name": "telegram-bot",
   "version": "1.0.0",
-  "description": "A Telegram bot running on Render",
+  "description": "A Telegram bot for cybersecurity awareness and hacker connections",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "node-telegram-bot-api": "^0.61.0",
     "express": "^4.18.2",
+    "node-telegram-bot-api": "^0.61.0",
     "dotenv": "^16.0.3"
   },
-  "engines": {
-    "node": ">=14.0.0"
-  },
+  "author": "Your Name",
   "license": "MIT"
 }
