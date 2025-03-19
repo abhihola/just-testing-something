@@ -1,16 +1,14 @@
 {
   "name": "telegram-bot",
   "version": "1.0.0",
-  "description": "A Telegram bot for cybersecurity awareness and hacker connections",
+  "description": "Telegram bot for security assistance",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "node-telegram-bot-api": "^0.61.0",
-    "dotenv": "^16.0.3"
-  },
-  "author": "Your Name",
-  "license": "MIT"
+    "node-telegram-bot-api": "^0.56.0"
+  }
 }
