@@ -100,7 +100,74 @@ function sendDailyTips() {
     });
 }
 
-// Mock sending daily tips every 24 hours
+// Mock sending daily tips every 24 hoursconst TelegramBot = require('node-telegram-bot-api');
+require('dotenv').config();
+
+const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+
+const securityTips = [
+    "🛡️ Use strong, unique passwords.",
+    "🛡️ Enable 2FA on all accounts.",
+    "🛡️ Avoid clicking suspicious links.",
+    "🛡️ Keep your software updated.",
+    "🛡️ Never share personal details with strangers.",
+    "🔒 Use a VPN to protect your browsing activity.",
+    "🚨 Never use the same password across multiple accounts.",
+    "🔐 Always log out from public computers after use.",
+    "⚠️ Check URLs before entering login details to avoid phishing scams.",
+    "📵 Be cautious when connecting to public WiFi networks.",
+    "🕵️‍♂️ Use encrypted messaging apps for sensitive conversations."
+    // Add more tips here to reach 1000+
+];
+
+bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+    const firstName = msg.from.first_name || "User";
+
+    const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot connects you with **trusted hackers** to assist you.\n🔐 Plus, get **free tips** to stay safe online!\n\nOnly this bot can connect you with **verified hackers** on Telegram. Do not trust any random person! Choose an option below:`;
+
+    const options = {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: "🔍 Get a Trusted Hacker", url: "https://t.me/Hacktechnologyx" }],
+                [{ text: "🛡️ Free Security Tips", callback_data: "safety_tips" }],
+                [{ text: "⚠️ Report a Scam", url: "https://t.me/Hacktechnologyx" }],
+                [{ text: "✅ Verify a Person", url: "https://t.me/Hacktechnologyx" }],
+                [{ text: "📊 Request Security Audit", url: "https://t.me/Hacktechnologyx" }],
+                [{ text: "❌ Report a Fake Hacker", url: "https://t.me/Hacktechnologyx" }],
+                [{ text: "🔐 Cybersecurity Fact", callback_data: "cyber_fact" }]
+            ]
+        }
+    };
+
+    bot.sendMessage(chatId, welcomeMessage, options);
+});
+
+bot.on('callback_query', (query) => {
+    const chatId = query.message.chat.id;
+
+    if (query.data === "safety_tips") {
+        const randomTip = securityTips[Math.floor(Math.random() * securityTips.length)];
+        bot.sendMessage(chatId, `🔐 Security Tip: ${randomTip}`);
+    } 
+    
+    else if (query.data === "cyber_fact") {
+        const cyberFacts = [
+            "💻 The first computer virus was created in 1986, called 'Brain'.",
+            "🔐 Over 95% of cybersecurity breaches are caused by human error.",
+            "🛡️ The biggest data breach in history exposed over 3 billion accounts (Yahoo, 2013).",
+            "🚨 Every 39 seconds, a hacker attempts to breach a system somewhere in the world.",
+            "📱 60% of fraud originates from mobile devices, and 80% of mobile fraud comes from apps."
+        ];
+        const randomFact = cyberFacts[Math.floor(Math.random() * cyberFacts.length)];
+        bot.sendMessage(chatId, `📢 Cybersecurity Fact: ${randomFact}`);
+    }
+
+    bot.answerCallbackQuery(query.id);
+});
+
+console.log("Bot is running...");
+
 setInterval(sendDailyTips, 24 * 60 * 60 * 1000);
 
 console.log("Bot is running...");
