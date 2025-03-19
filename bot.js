@@ -18,9 +18,9 @@ bot.onText(/\/start/, (msg) => {
     const options = {
         reply_markup: {
             inline_keyboard: [
-                [{ text: "🔍 Get a Trusted Hacker", url: "https://t.me/ SPECIALIST_MICHAELOO" }],
+                [{ text: "🔍 Get a Trusted Hacker", url: "https://t.me/SPECIALIST_MICHAELOO" }],
                 [{ text: "🛡️ Free Safety Tips", callback_data: "safety_tips" }],
-                [{ text: "⚠️ Report a Scam", url: "https://t.me/ SPECIALIST_MICHAELOO" }]
+                [{ text: "⚠️ Report a Scam", url: "https://t.me/SPECIALIST_MICHAELOO" }]
             ]
         }
     };
