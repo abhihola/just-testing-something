@@ -1,31 +1,42 @@
 const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 
-if (!process.env.BOT_TOKEN) {
-    console.error("❌ Error: BOT_TOKEN is missing in .env");
-    process.exit(1);
-}
+const bot = new TelegramBot(process.env.BOT_TOKEN, { 
+    polling: true, 
+    autoStart: true 
+});
 
-// ✅ Declare the bot only once
-const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+const securityTips = [
+    "🛡️ Use strong, unique passwords.",
+    "🛡️ Enable two-factor authentication (2FA).",
+    "🛡️ Avoid clicking on suspicious links.",
+    "🛡️ Keep your software updated.",
+    "🛡️ Never share personal details with strangers.",
+    "🛡️ Always verify a website’s URL before entering credentials.",
+    "🛡️ Use a VPN on public Wi-Fi.",
+    "🛡️ Avoid using the same password across multiple sites.",
+    "🛡️ Regularly check your bank statements for fraud.",
+    "🛡️ Backup your important data frequently.",
+    // Add 990 more tips here...
+];
 
-// ✅ Welcome message
+// 🏁 Start Command
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     const firstName = msg.from.first_name || "User";
 
-    const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot connects you with **trusted hackers** to assist you.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
+    const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
 
     const options = {
         reply_markup: {
             inline_keyboard: [
                 [{ text: "🔍 Get a Trusted Hacker", url: "https://t.me/Hacktechnologyx" }],
-                [{ text: "🛡️ Free Safety Tips", callback_data: "safety_tips" }],
+                [{ text: "🛡️ Free Security Tips", callback_data: "safety_tips" }],
                 [{ text: "⚠️ Report a Scam", url: "https://t.me/Hacktechnologyx" }],
-                [{ text: "🔍 Verify a Person", callback_data: "verify_person" }],
-                [{ text: "📊 Request Security Audit", callback_data: "security_audit" }],
+                [{ text: "✅ Verify a Person", callback_data: "verify_person" }],
+                [{ text: "🔎 Request Security Audit", callback_data: "security_audit" }],
                 [{ text: "🚨 Report a Fake Hacker", callback_data: "report_fake_hacker" }],
-                [{ text: "🔐 Cyber Security Fact", callback_data: "cyber_fact" }]
+                [{ text: "📖 Cyber Security Fact", callback_data: "cyber_fact" }]
             ]
         }
     };
@@ -33,35 +44,31 @@ bot.onText(/\/start/, (msg) => {
     bot.sendMessage(chatId, welcomeMessage, options);
 });
 
-// ✅ Handle button clicks
+// 🛡️ Handle Button Clicks
 bot.on('callback_query', (query) => {
     const chatId = query.message.chat.id;
 
-    if (query.data === "safety_tips") {
-        const tips = [
-            "🛡️ Use strong, unique passwords.",
-            "🛡️ Enable 2FA on all accounts.",
-            "🛡️ Avoid clicking suspicious links.",
-            "🛡️ Keep your software updated.",
-            "🛡️ Never share personal details with strangers."
-        ];
-        const randomTip = tips[Math.floor(Math.random() * tips.length)];
-        bot.sendMessage(chatId, randomTip);
-    } else if (query.data === "verify_person") {
-        bot.sendMessage(chatId, "🔍 To verify a person, please provide their Telegram username or details.");
-    } else if (query.data === "security_audit") {
-        bot.sendMessage(chatId, "📊 Requesting a security audit? Contact us at https://t.me/Hacktechnologyx.");
-    } else if (query.data === "report_fake_hacker") {
-        bot.sendMessage(chatId, "🚨 Report a fake hacker at https://t.me/Hacktechnologyx.");
-    } else if (query.data === "cyber_fact") {
-        const facts = [
-            "🔐 Fact: 95% of cybersecurity breaches are due to human error.",
-            "🔐 Fact: The first computer virus was created in 1986.",
-            "🔐 Fact: Ransomware attacks have increased by 350% in the last 5 years.",
-            "🔐 Fact: The strongest passwords are at least 16 characters long."
-        ];
-        const randomFact = facts[Math.floor(Math.random() * facts.length)];
-        bot.sendMessage(chatId, randomFact);
+    switch (query.data) {
+        case "safety_tips":
+            const randomTip = securityTips[Math.floor(Math.random() * securityTips.length)];
+            bot.sendMessage(chatId, `🔐 **Security Tip:**\n${randomTip}`);
+            break;
+        
+        case "verify_person":
+            bot.sendMessage(chatId, "✅ **To verify a person, please provide their details to our trusted team.**\n\n📩 Contact: @Hacktechnologyx");
+            break;
+
+        case "security_audit":
+            bot.sendMessage(chatId, "🔎 **Request a Security Audit**\n\nOur experts can audit your security. Contact us: @Hacktechnologyx");
+            break;
+
+        case "report_fake_hacker":
+            bot.sendMessage(chatId, "🚨 **Report a Fake Hacker**\n\nIf you suspect a scammer, report them to: @Hacktechnologyx");
+            break;
+
+        case "cyber_fact":
+            bot.sendMessage(chatId, "💡 **Cyber Security Fact:**\nDid you know? **Over 80% of hacking-related breaches are due to weak passwords.** Always use strong, unique passwords!");
+            break;
     }
 
     bot.answerCallbackQuery(query.id);
