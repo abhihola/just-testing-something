@@ -1,16 +1,14 @@
-const express = require("express");
+const express = require('express');
+require('dotenv').config();
+require('./bot'); // Runs the Telegram bot
+
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// Web route to check if the service is running
-app.get("/", (req, res) => {
-    res.send("Bot is running...");
+app.get('/', (req, res) => {
+    res.send("Telegram bot is running...");
 });
 
-// Start the web server
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
-
-// Start the bot
-require("./bot.js");
