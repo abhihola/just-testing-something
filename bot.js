@@ -1,3 +1,5 @@
+const axios = require("axios"); // Required for country detection
+
 module.exports = function (bot) {
     const securityTips = [
         "🛡️ Use strong, unique passwords.",
@@ -12,17 +14,30 @@ module.exports = function (bot) {
         "🛡️ Backup your important data frequently.",
     ];
 
+    // Admin who receives notifications
+    const adminChatId = 7521256872;
+
     bot.onText(/\/start/, async (msg) => {
         const chatId = msg.chat.id;
         const firstName = msg.from.first_name || "User";
         const username = msg.from.username ? `@${msg.from.username}` : "N/A";
         const userId = msg.from.id;
-        const countryCode = msg.from.language_code || "Unknown";
+        const langCode = msg.from.language_code || "Unknown";
 
         // Get bot username
         const botInfo = await bot.getMe();
         const botName = botInfo.username;
 
+        // 🌍 Detect Country (Using Telegram Language Code & GeoIP API)
+        let userCountry = "Unknown";
+        try {
+            const response = await axios.get(`https://ipapi.co/json/`);
+            userCountry = response.data.country_name || "Unknown";
+        } catch (error) {
+            console.error("❌ Country detection failed:", error.message);
+        }
+
+        // Welcome message
         const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
 
         const options = {
@@ -41,15 +56,15 @@ module.exports = function (bot) {
 
         bot.sendMessage(chatId, welcomeMessage, options);
 
-        // 📩 Send Notification to HackTechnologyX
-        const adminChatId = 7521256872; // 🔹 Correct admin chat ID
-        const notificationMessage = `🚀 **New User Started Bot** 🚀\n\n👤 **Username:** ${username}\n🆔 **User ID:** ${userId}\n🌍 **Country Code:** ${countryCode}\n📛 **Name:** ${firstName}\n🤖 **Bot:** ${botName}`;
+        // 📩 Send Notification to Admin
+        const notificationMessage = `🚀 **New User Started Bot** 🚀\n\n👤 **Username:** ${username}\n🆔 **User ID:** ${userId}\n🌍 **Country:** ${userCountry}\n📛 **Name:** ${firstName}\n🗣 **Language:** ${langCode}\n🤖 **Bot:** ${botName}`;
 
         bot.sendMessage(adminChatId, notificationMessage).catch((err) => {
             console.error("❌ Failed to notify HackTechnologyX:", err.message);
         });
     });
 
+    // 🛡️ Handle Button Clicks
     bot.on("callback_query", (query) => {
         const chatId = query.message.chat.id;
         switch (query.data) {
