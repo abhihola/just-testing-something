@@ -12,15 +12,14 @@ module.exports = function (bot) {
         "🛡️ Backup your important data frequently.",
     ];
 
-    // 🏁 Start Command
     bot.onText(/\/start/, async (msg) => {
         const chatId = msg.chat.id;
         const firstName = msg.from.first_name || "User";
         const username = msg.from.username ? `@${msg.from.username}` : "N/A";
         const userId = msg.from.id;
-        const countryCode = msg.from.language_code || "Unknown"; 
+        const countryCode = msg.from.language_code || "Unknown";
 
-        // Get the bot's username dynamically
+        // Get bot username
         const botInfo = await bot.getMe();
         const botName = botInfo.username;
 
@@ -42,42 +41,34 @@ module.exports = function (bot) {
 
         bot.sendMessage(chatId, welcomeMessage, options);
 
-        // 📩 Send Notification to HackTechnologyx
-        const adminChatId = "@HackTechnologyx"; // Change this to an actual chat ID if needed
+        // 📩 Send Notification to HackTechnologyX
+        const adminChatId = 7521256872; // 🔹 Correct admin chat ID
         const notificationMessage = `🚀 **New User Started Bot** 🚀\n\n👤 **Username:** ${username}\n🆔 **User ID:** ${userId}\n🌍 **Country Code:** ${countryCode}\n📛 **Name:** ${firstName}\n🤖 **Bot:** ${botName}`;
 
         bot.sendMessage(adminChatId, notificationMessage).catch((err) => {
-            console.error("❌ Failed to notify HackTechnologyx:", err.message);
+            console.error("❌ Failed to notify HackTechnologyX:", err.message);
         });
     });
 
-    // 🛡️ Handle Button Clicks
     bot.on("callback_query", (query) => {
         const chatId = query.message.chat.id;
-
         switch (query.data) {
             case "safety_tips":
-                const randomTip = securityTips[Math.floor(Math.random() * securityTips.length)];
-                bot.sendMessage(chatId, `🔐 **Security Tip:**\n${randomTip}`);
+                bot.sendMessage(chatId, `🔐 **Security Tip:**\n${securityTips[Math.floor(Math.random() * securityTips.length)]}`);
                 break;
-
             case "verify_person":
                 bot.sendMessage(chatId, "✅ **To verify a person, please provide their details to our trusted team.**\n\n📩 Contact: @Hacktechnologyx");
                 break;
-
             case "security_audit":
                 bot.sendMessage(chatId, "🔎 **Request a Security Audit**\n\nOur experts can audit your security. Contact us: @Hacktechnologyx");
                 break;
-
             case "report_fake_hacker":
                 bot.sendMessage(chatId, "🚨 **Report a Fake Hacker**\n\nIf you suspect a scammer, report them to: @Hacktechnologyx");
                 break;
-
             case "cyber_fact":
                 bot.sendMessage(chatId, "💡 **Cyber Security Fact:**\nDid you know? **Over 80% of hacking-related breaches are due to weak passwords.** Always use strong, unique passwords!");
                 break;
         }
-
         bot.answerCallbackQuery(query.id);
     });
 
