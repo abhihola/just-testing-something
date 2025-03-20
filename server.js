@@ -18,13 +18,19 @@ if (botTokens.length === 0) {
 // Store all bot instances
 const bots = [];
 
-botTokens.forEach((token, index) => {
+botTokens.forEach(async (token, index) => {
     const bot = new TelegramBot(token.trim(), { polling: true });
 
     // Load shared bot functions
     botFunctions(bot);
 
-    console.log(`✅ Bot ${index + 1} is running with token: ${token.trim().slice(0, 5)}...`);
+    // Get bot name dynamically
+    try {
+        const botInfo = await bot.getMe();
+        console.log(`✅ Bot ${index + 1} (@${botInfo.username}) is running.`);
+    } catch (error) {
+        console.error(`❌ Failed to fetch bot info for token ${token.trim().slice(0, 5)}...`);
+    }
 
     bots.push(bot);
 });
