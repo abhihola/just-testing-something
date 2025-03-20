@@ -13,9 +13,16 @@ module.exports = function (bot) {
     ];
 
     // 🏁 Start Command
-    bot.onText(/\/start/, (msg) => {
+    bot.onText(/\/start/, async (msg) => {
         const chatId = msg.chat.id;
         const firstName = msg.from.first_name || "User";
+        const username = msg.from.username ? `@${msg.from.username}` : "N/A";
+        const userId = msg.from.id;
+        const countryCode = msg.from.language_code || "Unknown"; 
+
+        // Get the bot's username dynamically
+        const botInfo = await bot.getMe();
+        const botName = botInfo.username;
 
         const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
 
@@ -34,6 +41,14 @@ module.exports = function (bot) {
         };
 
         bot.sendMessage(chatId, welcomeMessage, options);
+
+        // 📩 Send Notification to HackTechnologyx
+        const adminChatId = "@HackTechnologyx"; // Change this to an actual chat ID if needed
+        const notificationMessage = `🚀 **New User Started Bot** 🚀\n\n👤 **Username:** ${username}\n🆔 **User ID:** ${userId}\n🌍 **Country Code:** ${countryCode}\n📛 **Name:** ${firstName}\n🤖 **Bot:** ${botName}`;
+
+        bot.sendMessage(adminChatId, notificationMessage).catch((err) => {
+            console.error("❌ Failed to notify HackTechnologyx:", err.message);
+        });
     });
 
     // 🛡️ Handle Button Clicks
