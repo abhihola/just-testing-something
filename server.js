@@ -18,21 +18,20 @@ if (botTokens.length === 0) {
 // Store all bot instances
 const bots = [];
 
-botTokens.forEach(async (token, index) => {
+botTokens.forEach((token, index) => {
     const bot = new TelegramBot(token.trim(), { polling: true });
 
-    // Load shared bot functions
+    // Pass the bot instance so each bot gets its own notification logic
     botFunctions(bot);
 
-    // Get bot name dynamically
-    try {
-        const botInfo = await bot.getMe();
-        console.log(`✅ Bot ${index + 1} (@${botInfo.username}) is running.`);
-    } catch (error) {
-        console.error(`❌ Failed to fetch bot info for token ${token.trim().slice(0, 5)}...`);
-    }
-
     bots.push(bot);
+
+    // Get bot name dynamically and log it
+    bot.getMe().then((botInfo) => {
+        console.log(`✅ Bot ${index + 1} (@${botInfo.username}) is running.`);
+    }).catch((error) => {
+        console.error(`❌ Failed to fetch bot info:`, error.message);
+    });
 });
 
 // Render Deploy Hook URL (Auto-refresh every 5 minutes)
