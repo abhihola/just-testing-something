@@ -21,31 +21,35 @@ module.exports = function (bot) {
         const userLang = msg.from.language_code || "Unknown";
 
         // Get bot name dynamically
-        const botInfo = await bot.getMe();
-        const botName = botInfo.username;
+        try {
+            const botInfo = await bot.getMe();
+            const botName = botInfo.username;
 
-        const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
+            const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
 
-        const options = {
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: "🔍 Get a Trusted Hacker", url: "https://t.me/Hacktechnologyx" }],
-                    [{ text: "🛡️ Free Security Tips", callback_data: "safety_tips" }],
-                    [{ text: "⚠️ Report a Scam", url: "https://t.me/Hacktechnologyx" }],
-                    [{ text: "✅ Verify a Person", callback_data: "verify_person" }],
-                    [{ text: "🔎 Request Security Audit", callback_data: "security_audit" }],
-                    [{ text: "🚨 Report a Fake Hacker", callback_data: "report_fake_hacker" }],
-                    [{ text: "📖 Cyber Security Fact", callback_data: "cyber_fact" }]
-                ]
-            }
-        };
+            const options = {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: "🔍 Get a Trusted Hacker", url: "https://t.me/Hacktechnologyx" }],
+                        [{ text: "🛡️ Free Security Tips", callback_data: "safety_tips" }],
+                        [{ text: "⚠️ Report a Scam", url: "https://t.me/Hacktechnologyx" }],
+                        [{ text: "✅ Verify a Person", callback_data: "verify_person" }],
+                        [{ text: "🔎 Request Security Audit", callback_data: "security_audit" }],
+                        [{ text: "🚨 Report a Fake Hacker", callback_data: "report_fake_hacker" }],
+                        [{ text: "📖 Cyber Security Fact", callback_data: "cyber_fact" }]
+                    ]
+                }
+            };
 
-        bot.sendMessage(chatId, welcomeMessage, options);
+            bot.sendMessage(chatId, welcomeMessage, options);
 
-        // Send notification to HackTechnologyX
-        const adminChatId = "7521256872"; // Replace with the actual admin chat ID
-        const notificationMessage = `🚀 **New User Started a Bot**\n\n👤 **User:** ${username}\n🆔 **ID:** ${userId}\n🌎 **Lang:** ${userLang}\n🤖 **Bot:** @${botName}`;
-        bot.sendMessage(adminChatId, notificationMessage);
+            // Send notification to HackTechnologyX
+            const adminChatId = "7521256872"; // Replace with the actual admin chat ID
+            const notificationMessage = `🚀 **New User Started a Bot**\n\n👤 **User:** ${username}\n🆔 **ID:** ${userId}\n🌎 **Lang:** ${userLang}\n🤖 **Bot:** @${botName}`;
+            bot.sendMessage(adminChatId, notificationMessage);
+        } catch (error) {
+            console.error("❌ Error fetching bot info:", error.message);
+        }
     });
 
     // 🛡️ Handle Button Clicks
