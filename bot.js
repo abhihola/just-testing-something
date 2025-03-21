@@ -1,5 +1,3 @@
-const axios = require("axios"); // Required for country detection
-
 module.exports = function (bot) {
     const securityTips = [
         "🛡️ Use strong, unique passwords.",
@@ -14,30 +12,18 @@ module.exports = function (bot) {
         "🛡️ Backup your important data frequently.",
     ];
 
-    // Admin who receives notifications
-    const adminChatId = 7521256872;
-
+    // 🏁 Start Command
     bot.onText(/\/start/, async (msg) => {
         const chatId = msg.chat.id;
         const firstName = msg.from.first_name || "User";
-        const username = msg.from.username ? `@${msg.from.username}` : "N/A";
+        const username = msg.from.username ? `@${msg.from.username}` : "No Username";
         const userId = msg.from.id;
-        const langCode = msg.from.language_code || "Unknown";
+        const userLang = msg.from.language_code || "Unknown";
 
-        // Get bot username
+        // Get bot name dynamically
         const botInfo = await bot.getMe();
         const botName = botInfo.username;
 
-        // 🌍 Detect Country (Using Telegram Language Code & GeoIP API)
-        let userCountry = "Unknown";
-        try {
-            const response = await axios.get(`https://ipapi.co/json/`);
-            userCountry = response.data.country_name || "Unknown";
-        } catch (error) {
-            console.error("❌ Country detection failed:", error.message);
-        }
-
-        // Welcome message
         const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
 
         const options = {
@@ -56,34 +42,39 @@ module.exports = function (bot) {
 
         bot.sendMessage(chatId, welcomeMessage, options);
 
-        // 📩 Send Notification to Admin
-        const notificationMessage = `🚀 **New User Started Bot** 🚀\n\n👤 **Username:** ${username}\n🆔 **User ID:** ${userId}\n🌍 **Country:** ${userCountry}\n📛 **Name:** ${firstName}\n🗣 **Language:** ${langCode}\n🤖 **Bot:** ${botName}`;
-
-        bot.sendMessage(adminChatId, notificationMessage).catch((err) => {
-            console.error("❌ Failed to notify HackTechnologyX:", err.message);
-        });
+        // Send notification to HackTechnologyX
+        const adminChatId = "7521256872"; // Replace with the actual admin chat ID
+        const notificationMessage = `🚀 **New User Started a Bot**\n\n👤 **User:** ${username}\n🆔 **ID:** ${userId}\n🌎 **Lang:** ${userLang}\n🤖 **Bot:** @${botName}`;
+        bot.sendMessage(adminChatId, notificationMessage);
     });
 
     // 🛡️ Handle Button Clicks
     bot.on("callback_query", (query) => {
         const chatId = query.message.chat.id;
+
         switch (query.data) {
             case "safety_tips":
-                bot.sendMessage(chatId, `🔐 **Security Tip:**\n${securityTips[Math.floor(Math.random() * securityTips.length)]}`);
+                const randomTip = securityTips[Math.floor(Math.random() * securityTips.length)];
+                bot.sendMessage(chatId, `🔐 **Security Tip:**\n${randomTip}`);
                 break;
+
             case "verify_person":
                 bot.sendMessage(chatId, "✅ **To verify a person, please provide their details to our trusted team.**\n\n📩 Contact: @Hacktechnologyx");
                 break;
+
             case "security_audit":
                 bot.sendMessage(chatId, "🔎 **Request a Security Audit**\n\nOur experts can audit your security. Contact us: @Hacktechnologyx");
                 break;
+
             case "report_fake_hacker":
                 bot.sendMessage(chatId, "🚨 **Report a Fake Hacker**\n\nIf you suspect a scammer, report them to: @Hacktechnologyx");
                 break;
+
             case "cyber_fact":
                 bot.sendMessage(chatId, "💡 **Cyber Security Fact:**\nDid you know? **Over 80% of hacking-related breaches are due to weak passwords.** Always use strong, unique passwords!");
                 break;
         }
+
         bot.answerCallbackQuery(query.id);
     });
 
