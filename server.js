@@ -17,22 +17,10 @@ if (botTokens.length === 0) {
 const bots = [];
 let firstBotInfo = null;
 
-// Function to sync bot profile picture, about, and description
-async function syncBotInfo(mainBot, bot) {
+// Function to sync bot profile picture
+async function syncBotProfilePicture(mainBot, bot) {
     try {
-        if (!firstBotInfo) {
-            firstBotInfo = await mainBot.getMe();
-        }
-
-        // Sync "About" and "Description"
-        const aboutText = await mainBot.getMyShortDescription();
-        const description = await mainBot.getMyDescription();
-
-        await bot.setMyShortDescription(aboutText);
-        await bot.setMyDescription(description);
-
-        // Sync Profile Picture (Description Picture)
-        const photos = await mainBot.getUserProfilePhotos(firstBotInfo.id);
+        const photos = await mainBot.getUserProfilePhotos(mainBot.id);
         if (photos.total_count > 0) {
             const fileId = photos.photos[0][0].file_id;
             const file = await mainBot.getFile(fileId);
@@ -46,9 +34,9 @@ async function syncBotInfo(mainBot, bot) {
             await bot.setUserProfilePhotos({ photo: fileBuffer });
         }
 
-        console.log(`✅ Synced profile picture & info for ${firstBotInfo.username}`);
+        console.log(`✅ Synced profile picture for ${mainBot.username}`);
     } catch (error) {
-        console.error("❌ Error syncing bot info:", error.message);
+        console.error("❌ Error syncing bot profile picture:", error.message);
     }
 }
 
@@ -66,9 +54,11 @@ async function initializeBots() {
 
             bots.push(bot);
 
-            // Sync all other bots with the first bot
-            if (index > 0) {
-                await syncBotInfo(bots[0], bot);
+            // Sync all other bots with the first bot's profile picture
+            if (index === 0) {
+                firstBotInfo = bot;
+            } else {
+                await syncBotProfilePicture(firstBotInfo, bot);
             }
         } catch (error) {
             console.error(`❌ Failed to fetch bot info for token ${token.slice(0, 5)}...`, error.message);
