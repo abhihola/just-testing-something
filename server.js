@@ -2,11 +2,12 @@ const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 const axios = require("axios");
 require("dotenv").config();
-const botFunctions = require("./bot");
+const botFunctions = require("./bot"); // Import shared bot logic
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Get all bot tokens from .env and split them into an array
 const botTokens = process.env.BOT_TOKENS ? process.env.BOT_TOKENS.split(",") : [];
 
 if (botTokens.length === 0) {
@@ -14,63 +15,25 @@ if (botTokens.length === 0) {
     process.exit(1);
 }
 
+// Store all bot instances
 const bots = [];
-let firstBotInfo = null;
 
-// Function to sync bot profile picture
-async function syncBotProfilePicture(mainBot, bot) {
+botTokens.forEach(async (token, index) => {
+    const bot = new TelegramBot(token.trim(), { polling: true });
+
+    // Load shared bot functions
+    botFunctions(bot);
+
+    // Get bot name dynamically
     try {
-        const botInfo = await mainBot.getMe();
-        const botUserId = botInfo.id; // Correctly fetch the bot's ID
-
-        const photos = await mainBot.getUserProfilePhotos(botUserId); // Now it has the correct user ID
-        if (photos.total_count > 0) {
-            const fileId = photos.photos[0][0].file_id;
-            const file = await mainBot.getFile(fileId);
-            const fileUrl = `https://api.telegram.org/file/bot${botTokens[0].trim()}/${file.file_path}`;
-
-            // Download profile picture
-            const fileResponse = await axios.get(fileUrl, { responseType: "arraybuffer" });
-            const fileBuffer = Buffer.from(fileResponse.data, "binary");
-
-            // Upload the same profile picture to the bot
-            await bot.setUserProfilePhotos({ photo: fileBuffer });
-        }
-
-        console.log(`✅ Synced profile picture for ${botInfo.username}`);
+        const botInfo = await bot.getMe();
+        console.log(`✅ Bot ${index + 1} (@${botInfo.username}) is running.`);
     } catch (error) {
-        console.error("❌ Error syncing bot profile picture:", error.message);
+        console.error(`❌ Failed to fetch bot info for token ${token.trim().slice(0, 5)}...`);
     }
-}
 
-// Initialize bots asynchronously
-async function initializeBots() {
-    for (let index = 0; index < botTokens.length; index++) {
-        const token = botTokens[index].trim();
-        const bot = new TelegramBot(token, { polling: true });
-
-        botFunctions(bot);
-
-        try {
-            const botInfo = await bot.getMe();
-            console.log(`✅ Bot ${index + 1} (@${botInfo.username}) is running.`);
-
-            bots.push(bot);
-
-            // Sync all other bots with the first bot's profile picture
-            if (index === 0) {
-                firstBotInfo = bot;
-            } else {
-                await syncBotProfilePicture(firstBotInfo, bot);
-            }
-        } catch (error) {
-            console.error(`❌ Failed to fetch bot info for token ${token.slice(0, 5)}...`, error.message);
-        }
-    }
-}
-
-// Start bot initialization
-initializeBots();
+    bots.push(bot);
+});
 
 // Render Deploy Hook URL (Auto-refresh every 5 minutes)
 const DEPLOY_HOOK_URL = "https://api.render.com/deploy/srv-cveud62n91rc73aqae2g?key=UjWzaiTyytQ";
@@ -92,5 +55,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(` Server is running on port ${PORT}`);
 });
