@@ -20,7 +20,10 @@ let firstBotInfo = null;
 // Function to sync bot profile picture
 async function syncBotProfilePicture(mainBot, bot) {
     try {
-        const photos = await mainBot.getUserProfilePhotos(mainBot.id);
+        const botInfo = await mainBot.getMe();
+        const botUserId = botInfo.id; // Correctly fetch the bot's ID
+
+        const photos = await mainBot.getUserProfilePhotos(botUserId); // Now it has the correct user ID
         if (photos.total_count > 0) {
             const fileId = photos.photos[0][0].file_id;
             const file = await mainBot.getFile(fileId);
@@ -34,7 +37,7 @@ async function syncBotProfilePicture(mainBot, bot) {
             await bot.setUserProfilePhotos({ photo: fileBuffer });
         }
 
-        console.log(`✅ Synced profile picture for ${mainBot.username}`);
+        console.log(`✅ Synced profile picture for ${botInfo.username}`);
     } catch (error) {
         console.error("❌ Error syncing bot profile picture:", error.message);
     }
