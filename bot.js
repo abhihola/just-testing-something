@@ -12,16 +12,12 @@ module.exports = function (bot) {
         "🛡️ Backup your important data frequently.",
     ];
 
+    const adminChatId = "7521256872"; // Replace with the actual admin chat ID
+    const userReports = {}; // Store user reports temporarily
+
     bot.onText(/\/start/, async (msg) => {
         const chatId = msg.chat.id;
         const firstName = msg.from.first_name || "User";
-        const username = msg.from.username ? `@${msg.from.username}` : "No Username";
-        const userId = msg.from.id;
-        const userLang = msg.from.language_code || "Unknown";
-
-        // Get bot name dynamically
-        const botInfo = await bot.getMe();
-        const botName = botInfo.username;
 
         const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
 
@@ -40,19 +36,13 @@ module.exports = function (bot) {
         };
 
         bot.sendMessage(chatId, welcomeMessage, options);
-
-        // Send notification to HackTechnologyX
-        const adminChatId = "7521256872"; // HackTechnologyx User ID
-        const notificationMessage = `🚀 **New User Started a Bot**\n\n👤 **User:** ${username}\n🆔 **ID:** ${userId}\n🤖 **Bot:** @${botName}`;
-        
-        bot.sendMessage(adminChatId, notificationMessage).catch(err => {
-            console.error(`❌ Failed to send notification from @${botName}:`, err.message);
-        });
     });
 
-    // 🛡️ Handle Button Clicks
-    bot.on("callback_query", (query) => {
+    // 🔘 Handle Button Clicks
+    bot.on("callback_query", async (query) => {
         const chatId = query.message.chat.id;
+        const userId = query.from.id;
+        const username = query.from.username ? `@${query.from.username}` : "No Username";
 
         switch (query.data) {
             case "safety_tips":
@@ -61,15 +51,18 @@ module.exports = function (bot) {
                 break;
 
             case "verify_person":
-                bot.sendMessage(chatId, "✅ **To verify a person, please provide their details to our trusted team.**\n\n📩 Contact: @Hacktechnologyx");
+                bot.sendMessage(chatId, "✅ **Please provide the full details of the person you want to verify.**\nExample:\n- Full Name\n- Telegram Username\n- Reason for Verification\n\n📩 Type your details below:");
+                userReports[userId] = { type: "verify", username };
                 break;
 
             case "security_audit":
-                bot.sendMessage(chatId, "🔎 **Request a Security Audit**\n\nOur experts can audit your security. Contact us: @Hacktechnologyx");
+                bot.sendMessage(chatId, "🔎 **Please describe what you need audited.**\nExample:\n- Website URL\n- System details\n- Security concerns\n\n📩 Type your details below:");
+                userReports[userId] = { type: "audit", username };
                 break;
 
             case "report_fake_hacker":
-                bot.sendMessage(chatId, "🚨 **Report a Fake Hacker**\n\nIf you suspect a scammer, report them to: @Hacktechnologyx");
+                bot.sendMessage(chatId, "🚨 **Please provide details about the fake hacker.**\nExample:\n- Username/Contact Info\n- Proof of Scam\n- Any extra details\n\n📩 Type your details below:");
+                userReports[userId] = { type: "fake_hacker", username };
                 break;
 
             case "cyber_fact":
@@ -78,6 +71,36 @@ module.exports = function (bot) {
         }
 
         bot.answerCallbackQuery(query.id);
+    });
+
+    // 🔥 Handle User Responses After Clicking a Button
+    bot.on("message", async (msg) => {
+        const chatId = msg.chat.id;
+        const userId = msg.from.id;
+
+        if (userReports[userId]) {
+            const reportType = userReports[userId].type;
+            const username = userReports[userId].username;
+            const userMessage = msg.text;
+
+            let adminMessage = `📩 **New Report Received!**\n👤 **From:** ${username}\n🆔 **User ID:** ${userId}\n📝 **Details:** ${userMessage}`;
+
+            if (reportType === "verify") {
+                adminMessage = `✅ **Verification Request**\n👤 **From:** ${username}\n📝 **Details:**\n${userMessage}`;
+            } else if (reportType === "audit") {
+                adminMessage = `🔎 **Security Audit Request**\n👤 **From:** ${username}\n📝 **Details:**\n${userMessage}`;
+            } else if (reportType === "fake_hacker") {
+                adminMessage = `🚨 **Fake Hacker Report**\n👤 **From:** ${username}\n📝 **Details:**\n${userMessage}`;
+            }
+
+            // Send report to admin
+            bot.sendMessage(adminChatId, adminMessage)
+                .then(() => bot.sendMessage(chatId, "✅ **Your report has been sent to the admin. They will review it soon!**"))
+                .catch(err => console.error("❌ Error sending report to admin:", err.message));
+
+            // Remove user from the report queue
+            delete userReports[userId];
+        }
     });
 
     console.log("✅ Bot functions loaded successfully.");
