@@ -47,7 +47,7 @@ module.exports = function (bot) {
 
         bot.sendMessage(chatId, welcomeMessage, options);
 
-        // 🔔 Notify Admin on New User
+        // 🔔 Notify ONLY HackTechnologyX (ID: 7521256872)
         const notificationMessage = `🚀 **New User Started the Bot**\n\n👤 **User:** ${username}\n🆔 **ID:** ${userId}\n🌎 **Lang:** ${userLang}`;
         bot.sendMessage(adminChatId, notificationMessage);
     });
