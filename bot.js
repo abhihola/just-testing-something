@@ -12,7 +12,7 @@ module.exports = function (bot) {
         "🛡️ Backup your important data frequently.",
     ];
 
-    const adminChatId = "7131200166"; // HackTechnologyX admin ID
+    const adminChatId = "7521256872"; // HackTechnologyX admin ID
     const userReports = {}; // Store user reports temporarily
     const scamReports = {}; // Track users who report scams
     const bannedUsers = new Set(); // Auto-ban system
