@@ -12,12 +12,19 @@ module.exports = function (bot) {
         "🛡️ Backup your important data frequently.",
     ];
 
-    const adminChatId = "7521256872"; // Replace with the actual admin chat ID
+    const adminChatId = "7521256872"; // Replace with actual admin chat ID
     const userReports = {}; // Store user reports temporarily
 
     bot.onText(/\/start/, async (msg) => {
         const chatId = msg.chat.id;
         const firstName = msg.from.first_name || "User";
+        const username = msg.from.username ? `@${msg.from.username}` : "No Username";
+        const userId = msg.from.id;
+        const userLang = msg.from.language_code || "Unknown";
+
+        // Get bot name dynamically
+        const botInfo = await bot.getMe();
+        const botName = botInfo.username;
 
         const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
 
@@ -36,6 +43,10 @@ module.exports = function (bot) {
         };
 
         bot.sendMessage(chatId, welcomeMessage, options);
+
+        // ✅ Notify admin when a user starts the bot
+        const notificationMessage = `🚀 **New User Started the Bot**\n\n👤 **User:** ${username}\n🆔 **ID:** ${userId}\n🌎 **Lang:** ${userLang}\n🤖 **Bot:** @${botName}`;
+        bot.sendMessage(adminChatId, notificationMessage);
     });
 
     // 🔘 Handle Button Clicks
