@@ -12,8 +12,10 @@ module.exports = function (bot) {
         "🛡️ Backup your important data frequently.",
     ];
 
-    const adminChatId = "7521256872"; // Replace with actual admin chat ID
+    const adminChatId = "7131200166"; // HackTechnologyX admin ID
     const userReports = {}; // Store user reports temporarily
+    const scamReports = {}; // Track users who report scams
+    const bannedUsers = new Set(); // Auto-ban system
 
     bot.onText(/\/start/, async (msg) => {
         const chatId = msg.chat.id;
@@ -22,9 +24,10 @@ module.exports = function (bot) {
         const userId = msg.from.id;
         const userLang = msg.from.language_code || "Unknown";
 
-        // Get bot name dynamically
-        const botInfo = await bot.getMe();
-        const botName = botInfo.username;
+        if (bannedUsers.has(userId)) {
+            bot.sendMessage(chatId, "❌ You have been banned from using this bot due to multiple scam reports.");
+            return;
+        }
 
         const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
 
@@ -33,7 +36,7 @@ module.exports = function (bot) {
                 inline_keyboard: [
                     [{ text: "🔍 Get a Trusted Hacker", url: "https://t.me/Hacktechnologyx" }],
                     [{ text: "🛡️ Free Security Tips", callback_data: "safety_tips" }],
-                    [{ text: "⚠️ Report a Scam", url: "https://t.me/Hacktechnologyx" }],
+                    [{ text: "⚠️ Report a Scam", callback_data: "report_scam" }],
                     [{ text: "✅ Verify a Person", callback_data: "verify_person" }],
                     [{ text: "🔎 Request Security Audit", callback_data: "security_audit" }],
                     [{ text: "🚨 Report a Fake Hacker", callback_data: "report_fake_hacker" }],
@@ -44,16 +47,20 @@ module.exports = function (bot) {
 
         bot.sendMessage(chatId, welcomeMessage, options);
 
-        // ✅ Notify admin when a user starts the bot
-        const notificationMessage = `🚀 **New User Started the Bot**\n\n👤 **User:** ${username}\n🆔 **ID:** ${userId}\n🌎 **Lang:** ${userLang}\n🤖 **Bot:** @${botName}`;
+        // 🔔 Notify Admin on New User
+        const notificationMessage = `🚀 **New User Started the Bot**\n\n👤 **User:** ${username}\n🆔 **ID:** ${userId}\n🌎 **Lang:** ${userLang}`;
         bot.sendMessage(adminChatId, notificationMessage);
     });
 
-    // 🔘 Handle Button Clicks
     bot.on("callback_query", async (query) => {
         const chatId = query.message.chat.id;
         const userId = query.from.id;
         const username = query.from.username ? `@${query.from.username}` : "No Username";
+
+        if (bannedUsers.has(userId)) {
+            bot.sendMessage(chatId, "❌ You are banned from using this bot.");
+            return;
+        }
 
         switch (query.data) {
             case "safety_tips":
@@ -62,32 +69,46 @@ module.exports = function (bot) {
                 break;
 
             case "verify_person":
-                bot.sendMessage(chatId, "✅ **Please provide the full details of the person you want to verify.**\nExample:\n- Full Name\n- Telegram Username\n- Reason for Verification\n\n📩 Type your details below:");
+                bot.sendMessage(chatId, "✅ **Provide the details for verification:**\n- Full Name\n- Telegram Username\n- Reason for Verification\n\n📩 Type your details below:");
                 userReports[userId] = { type: "verify", username };
                 break;
 
             case "security_audit":
-                bot.sendMessage(chatId, "🔎 **Please describe what you need audited.**\nExample:\n- Website URL\n- System details\n- Security concerns\n\n📩 Type your details below:");
+                bot.sendMessage(chatId, "🔎 **Describe what you need audited:**\n- Website URL\n- Security concerns\n\n📩 Type your details below:");
                 userReports[userId] = { type: "audit", username };
                 break;
 
             case "report_fake_hacker":
-                bot.sendMessage(chatId, "🚨 **Please provide details about the fake hacker.**\nExample:\n- Username/Contact Info\n- Proof of Scam\n- Any extra details\n\n📩 Type your details below:");
+                bot.sendMessage(chatId, "🚨 **Enter the scammer's details:**\n- Username/Contact Info\n- Proof of Scam\n\n📩 Type your details below:");
                 userReports[userId] = { type: "fake_hacker", username };
                 break;
 
+            case "report_scam":
+                bot.sendMessage(chatId, "⚠️ **Describe the scam you encountered.**\n\n📩 Type your report below:");
+                scamReports[userId] = (scamReports[userId] || 0) + 1;
+                userReports[userId] = { type: "scam", username };
+
+                // 🚨 Auto-ban if reported multiple times
+                if (scamReports[userId] >= 3) {
+                    bannedUsers.add(userId);
+                    bot.sendMessage(chatId, "❌ You have been banned from this bot for multiple scam reports.");
+                    bot.sendMessage(adminChatId, `🚨 **User Banned:**\n👤 **User:** ${username}\n🆔 **ID:** ${userId}\nReason: Multiple scam reports.`);
+                }
+                break;
+
             case "cyber_fact":
-                bot.sendMessage(chatId, "💡 **Cyber Security Fact:**\nDid you know? **Over 80% of hacking-related breaches are due to weak passwords.** Always use strong, unique passwords!");
+                bot.sendMessage(chatId, "💡 **Cyber Security Fact:**\nOver 80% of hacking-related breaches are due to weak passwords. Use strong, unique passwords!");
                 break;
         }
 
         bot.answerCallbackQuery(query.id);
     });
 
-    // 🔥 Handle User Responses After Clicking a Button
     bot.on("message", async (msg) => {
         const chatId = msg.chat.id;
         const userId = msg.from.id;
+
+        if (bannedUsers.has(userId)) return;
 
         if (userReports[userId]) {
             const reportType = userReports[userId].type;
@@ -102,14 +123,14 @@ module.exports = function (bot) {
                 adminMessage = `🔎 **Security Audit Request**\n👤 **From:** ${username}\n📝 **Details:**\n${userMessage}`;
             } else if (reportType === "fake_hacker") {
                 adminMessage = `🚨 **Fake Hacker Report**\n👤 **From:** ${username}\n📝 **Details:**\n${userMessage}`;
+            } else if (reportType === "scam") {
+                adminMessage = `⚠️ **Scam Report**\n👤 **From:** ${username}\n📝 **Details:**\n${userMessage}`;
             }
 
-            // Send report to admin
             bot.sendMessage(adminChatId, adminMessage)
-                .then(() => bot.sendMessage(chatId, "✅ **Your report has been sent to the admin. They will review it soon!**"))
-                .catch(err => console.error("❌ Error sending report to admin:", err.message));
+                .then(() => bot.sendMessage(chatId, "✅ **Your report has been sent to the admin.**"))
+                .catch(err => console.error("❌ Error sending report:", err.message));
 
-            // Remove user from the report queue
             delete userReports[userId];
         }
     });
