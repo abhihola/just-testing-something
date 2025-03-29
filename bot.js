@@ -1,4 +1,4 @@
-module.exports = function (bot) { const securityTips = [ "🛡️ Use strong, unique passwords.", "🛡️ Enable two-factor authentication (2FA).", "🛡️ Avoid clicking on suspicious links.", "🛡️ Keep your software updated.", "🛡️ Never share personal details with strangers.", "🛡️ Always verify a website’s URL before entering credentials.", "🛡️ Use a VPN on public Wi-Fi.", "🛡️ Avoid using the same password across multiple sites.", "🛡️ Regularly check your bank statements for fraud.", "🛡️ Backup your important data frequently.", ];
+module.exports = function (bot) { const securityTips = [ "🛡️ Use strong, unique passwords.", "🛡️ Enable two-factor authentication (2FA).", "🛡️ Avoid clicking on suspicious links.", "🛡️ Keep your software updated.", "🛡️ Never share personal details with strangers.", "🛡️ Always verify a website’s URL before entering credentials.", "🛡️ Use a VPN on public Wi-Fi.", "🛡️ Avoid using the same password across multiple sites.", "🛡️ Regularly check your bank statements for fraud.", "🛡️ Backup your important data frequently." ];
 
 const adminChatId = "7521256872"; // HackTechnologyX admin ID
 const userReports = {};
@@ -25,7 +25,7 @@ bot.onText(/\/start/, async (msg) => {
                 [{ text: "🔍 Get a Trusted Hacker", url: "https://t.me/Hacktechnologyx" }],
                 [{ text: "🛡️ Free Security Tips", callback_data: "safety_tips" }],
                 [{ text: "⚠️ Report a Scam", url: "https://t.me/Hacktechnologyx" }],
-                [{ text: "✅ Verify a Person", callback_data: "verify_person" }],
+                [{ text: "✅ Verify a Person", url: "https://t.me/Hacktechnologyx" }],
                 [{ text: "🔎 Request Security Audit", callback_data: "security_audit" }],
                 [{ text: "🚨 Report a Fake Hacker", callback_data: "report_fake_hacker" }],
                 [{ text: "📖 Cyber Security Fact", callback_data: "cyber_fact" }]
@@ -40,7 +40,7 @@ bot.onText(/\/start/, async (msg) => {
 bot.on("callback_query", async (query) => {
     const chatId = query.message.chat.id;
     const userId = query.from.id;
-    
+
     if (bannedUsers.has(userId)) {
         bot.sendMessage(chatId, "❌ You are banned from using this bot.");
         return;
@@ -50,10 +50,6 @@ bot.on("callback_query", async (query) => {
         case "safety_tips":
             const randomTip = securityTips[Math.floor(Math.random() * securityTips.length)];
             bot.sendMessage(chatId, `🔐 **Security Tip:**\n${randomTip}`);
-            break;
-        case "verify_person":
-            bot.sendMessage(chatId, "✅ **Provide the details for verification:**\n- Full Name\n- Telegram Username\n- Reason for Verification\n\n📩 Type your details below:");
-            userReports[userId] = { type: "verify" };
             break;
         case "security_audit":
             bot.sendMessage(chatId, "🔎 **Describe what you need audited:**\n- Website URL\n- Security concerns\n\n📩 Type your details below:");
