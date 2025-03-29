@@ -17,7 +17,7 @@ bot.onText(/\/start/, async (msg) => {
         return;
     }
 
-    const welcomeMessage = `Hello ${firstName},\n\n🤖 This bot **ONLY** connects you with **trusted hackers** on Telegram.\n🔐 Plus, get **free tips** to stay safe online!\n\nChoose an option below:`;
+    const welcomeMessage = `Hello ${firstName},\n\n🚀 **Looking for a trusted hacker?** You're in the right place! Our team of **verified cybersecurity experts** is ready to assist you.\n\n🔐 **We also provide free security tips** to help you stay protected online. Don't fall for scams—always work with verified professionals!\n\n📩 **Tap the button below to get started with a trusted expert now:**\n\n🔍 **[Get a Trusted Hacker](https://t.me/Hacktechnologyx)**`;
 
     const options = {
         reply_markup: {
