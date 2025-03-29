@@ -9,7 +9,7 @@ if (bannedUsers.has(userId)) {
     return;
 }
 
-const welcomeMessage = `Hello BRIANFORGE_ORIGINAL_RECOVERY_SUPPORT,\n\n🚀 **Looking for a trusted hacker?** You're in the right place! Our team of **verified cybersecurity experts** is ready to assist you.\n\n🔐 **We also provide free security tips** to help you stay protected online. Don't fall for scams—always work with verified professionals!\n\n📩 **Tap the button below to get started with a trusted expert now:**`;
+const welcomeMessage = `Hello ${first_name},\n\n🚀 **Looking for a trusted hacker?** You're in the right place! Our team of **verified cybersecurity experts** is ready to assist you.\n\n🔐 **We also provide free security tips** to help you stay protected online. Don't fall for scams—always work with verified professionals!\n\n📩 **Tap the button below to get started with a trusted expert now:**`;
 
 const options = {
     reply_markup: {
