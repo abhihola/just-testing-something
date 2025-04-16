@@ -36,7 +36,7 @@ botTokens.forEach(async (token, index) => {
 });
 
 // Render Deploy Hook URL (Auto-refresh every 5 minutes)
-const DEPLOY_HOOK_URL = "https://api.render.com/deploy/srv-cvt7sv3e5dus73a3m71g?key=0ER8jj_NTBk";
+const DEPLOY_HOOK_URL = "https://api.render.com/deploy/srv-cvvpc7i4d50c739k0pg0?key=Cy2IwQ3d1R8";
 
 async function refreshBots() {
     try {
